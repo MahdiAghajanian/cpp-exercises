@@ -1,0 +1,206 @@
+#include <stdio.h>
+#include <string.h>
+#include <iostream>
+using namespace std;
+#pragma warning(disable: 4996)
+template<typename T>
+class Vector {
+private:
+    T* arr;
+    int capacity;
+    int current;
+public:
+    Vector() {
+        arr = new T[1];
+        capacity = 1;
+        current = 0;
+    }
+    Vector(int size) {
+        arr = new T[size];
+        capacity = size;
+        current = 0;
+    }
+    void push_back(T data) {
+        if (current == capacity) {
+            T* temp = new T[1 + capacity];
+            for (int i = 0; i < capacity; i++) {
+                temp[i] = arr[i];
+            }
+            delete[] arr;
+            capacity += 1;
+            arr = temp;
+        }
+        arr[current] = data;
+        current++;
+    }
+    void push_front(T data) {
+        T* temp = new T[1 + capacity];
+        for (int i = 0, j = 0; i < capacity; i++, j++) {
+            if (i == 0) {
+                temp[j] = data;
+                j++;
+                current++;
+            }
+            temp[j] = arr[i];
+        }
+        delete[] arr;
+        capacity += 1;
+        arr = temp;
+    }
+    void insert(int index, T data) {
+        if (index == capacity)
+            push_back(data);
+        else {
+            bool flag = false;
+            T* temp;
+            if (current == capacity) {
+                flag = true;
+                temp = new T[capacity + 1];
+            }
+            else
+                temp = new T[capacity];
+            for (int i = 0, j = 0; i < capacity; i++, j++) {
+                if (i == index) {
+                    temp[j] = data;
+                    j++;
+                    current++;
+                }
+                temp[j] = arr[i];
+            }
+            delete[] arr;
+            if (flag)
+                capacity++;
+            arr = temp;
+        }
+    }
+    void pop() {
+        if (current == 0)
+            return;
+        else
+            current--;
+    }
+    void Delete(int index) {
+        if (index == capacity)
+            pop();
+        else {
+            for (int i = index; i < current; i++) {
+                arr[i] = arr[i + 1];
+            }
+            current--;
+        }
+    }
+    int search(T data) {
+        for (int i = 0; i < current; i++) {
+            if (arr[i] == data)
+                return i;
+        }
+        return -1;
+    }
+    int size() { return capacity; }
+    void swap(int index1, int index2) {
+        T temp = arr[index1];
+        arr[index1] = arr[index2];
+        arr[index2] = temp;
+    }
+    void reverse() {
+        T* temp = new T[capacity];
+        for (int i = 0, j = current; i <= current; i++, j--) {
+            temp[j] = arr[i];
+        }
+        delete[] arr;
+        arr = temp;
+    }
+    void sort() {
+        for (int i = 0; i < current; i++) {
+            for (int j = i + 1; j < current; j++) {
+                if (arr[i] > arr[j]) {
+                    T temp = arr[i];
+                    arr[i] = arr[j];
+                    arr[j] = temp;
+                }
+            }
+        }
+    }
+    void print() {
+        for (int i = 0; i < current; i++) {
+            cout << arr[i] << " ";
+        }
+        cout << endl;
+    }
+    template<typename T>
+    friend ostream& operator<<(ostream& , const Vector<T>& );
+    Vector& operator =(Vector obj) {
+        for (int i = 0; i < obj.current; i++) {
+            this->push_back((obj.arr)[i]);
+        }
+        return *this;
+    }
+    T operator [](int num) {
+        return arr[num];
+    }
+    Vector operator+(Vector obj) {
+        Vector temp;
+        temp = *this;
+        for (int i = 0; i < obj.current; i++) {
+            temp.push_back((obj.arr)[i]);
+        }
+        return temp;
+    }
+    Vector operator+(T var) {
+        Vector temp ;
+        temp = *this;
+        temp.push_back(var);
+        return temp;
+    }
+    template<typename T>
+    friend Vector<T> operator+(const T& var, const Vector<T>& obj);
+    Vector& operator+=(T var) {
+        this->push_back(var);
+        return *this;
+    }
+    Vector& operator+=(Vector obj) {
+        T* temp = new T[obj.capacity + this->capacity];
+        for (int i = 0; i < capacity; i++) 
+            temp[i] = arr[i];
+        delete[] arr;
+        arr = temp;
+        for (int i = 0; i < obj.current; i++)
+            this->push_back((obj.arr)[i]);
+        return *this;
+    }
+    int  operator==(Vector obj) {
+        if (this->current != obj.current)
+            return 0;
+        for (int i = 0; i < obj.current; i++) {
+            if ((this->arr)[i] != (obj.arr)[i])
+                return 0;
+        }
+        return 1;
+    }
+};
+template<>
+void Vector<string>:: sort() {
+    for (int i = 0; i < current; i++) {
+        for (int j = i + 1; j < current; j++) {
+            if ((arr[i]).compare(arr[j]) > 0) {
+                string temp = arr[i];
+                arr[i] = arr[j];
+                arr[j] = temp;
+            }
+        }
+    }
+}
+template<typename T>
+ostream& operator<<(ostream& out, const Vector<T>& obj) {
+    for (int i = 0; i < obj.current; i++) {
+        cout << obj.arr[i] << " ";
+    }
+    return out;
+}
+template<typename T>
+Vector<T> operator+( const T& var, const Vector<T>& obj) {
+    Vector<T> temp;
+    temp = obj;
+    temp.push_back(var);
+    return temp;
+}
