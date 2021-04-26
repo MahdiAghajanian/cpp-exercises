@@ -1,0 +1,534 @@
+//writer_information.h
+
+#pragma once
+#include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
+#include <iostream>
+#include <fstream>
+#include <windows.h>
+using namespace std;
+#pragma warning(disable: 4996)
+class writer_information {
+	char name[100];
+	char e_mail[100];
+	char gender;
+public:
+	writer_information();
+	writer_information(writer_information& obj2);
+	void set_writer_information(char _name[], char _e_mail[], char _gender);
+	const char* print_writer_information();
+	const char* get_writer_name();
+	~writer_information();
+};
+
+//Book_information.h
+
+#pragma once
+#include "writer_information.h"
+using namespace std;
+class Book_information {
+	char bookname[100];
+	writer_information writer;
+	int printyear;
+	int numberofbook;
+public:
+	Book_information();
+	Book_information(const Book_information& obj2);
+	int get_numberofbook();
+	void set_information(char _bookname[], writer_information _writer, int _printyear);
+	void add_numberofbook();
+	void subtract_numberofbook();
+	const char* print_book_information();
+	const char* get_bookname();
+	const char* get_writername();
+	~Book_information();
+};
+
+//Books_List.h
+
+#pragma once
+#include "Book_information.h"
+using namespace std;
+class Books_List {
+	Book_information booklist[100];
+	int counter = 0;
+public:
+	void addbook(Book_information _book);
+	void print_books();
+	int search(char _bookname[]);
+	void checkandgive_to_borrow_book(int booknum);
+	void return_book(int booknum);
+	void findandprint_writerbooks(char writername[]);
+	~Books_List();
+private:
+	void sortfunction(char str[][100], int count);
+};
+
+//Librarys_Information.h
+
+#pragma once
+#include "Books_List.h"
+using namespace std;
+class Librarys_Information {
+	char libraryname[100];
+	char address[100];
+	int establishedyear;
+	int numofemployers;
+	float starttime;
+	float endtime;
+	Books_List booklists;
+public:
+	void set(char _libraryname[], char _addressint[], int _establishedyear, int _numofemployers, float _starttime, float _endtime, Books_List _booklists);
+	void add_book_to_list(Book_information _book);
+	int search_book_from_list(char _book[]);
+	void checkandgive_to_borrow(char _book[]);
+	void checkandget_book(char _book[]);
+	void print_books_information();
+	void print_library_name();
+	void find_writer(char writername[]);
+	float get_starttime();
+	float get_endtime();
+	Librarys_Information();
+	~Librarys_Information();
+};
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//writer_information.cpp
+
+#include "writer_information.h"
+writer_information::writer_information() {
+	gender = '\0';
+	e_mail[0] = '\0';
+	name[0] = '\0';
+}
+writer_information::writer_information(writer_information& obj2) {
+	strcpy(name, obj2.name);
+	strcpy(e_mail, obj2.e_mail);
+	gender = obj2.gender;
+}
+void writer_information::set_writer_information(char _name[], char _e_mail[], char _gender) {
+	strcpy(name, _name);
+	strcpy(e_mail, _e_mail);
+	gender = _gender;
+}
+const char* writer_information::print_writer_information() {
+	char writerinf[100];
+	sprintf(writerinf, "%s ( %c ) %s", name, gender, e_mail);
+	return writerinf;;
+}
+const char* writer_information::get_writer_name() { return name; }
+writer_information::~writer_information() {
+
+}
+
+//Book_information.cpp
+
+#include "Book_information.h"
+Book_information::Book_information() {
+	printyear = 0;
+	numberofbook = 0;
+	bookname[0] = '\0';
+}
+Book_information::Book_information(const Book_information& obj2) {
+	numberofbook = obj2.numberofbook;
+	strcpy(bookname, obj2.bookname);
+	printyear = obj2.printyear;
+	writer = obj2.writer;
+}
+int Book_information::get_numberofbook() { return numberofbook; }
+void Book_information::set_information(char _bookname[], writer_information _writer, int _printyear) {
+	strcpy(bookname, _bookname);
+	writer = _writer;
+	printyear = _printyear;
+	numberofbook++;
+}
+void Book_information::add_numberofbook() {
+	numberofbook++;
+}
+void Book_information::subtract_numberofbook() {
+	numberofbook--;
+}
+const char* Book_information::print_book_information() {
+
+	char bookinf[100];
+	char writerinf[100];
+	strcpy(writerinf, writer.print_writer_information());
+	sprintf(bookinf, "%s %d %s", bookname, printyear, writerinf);
+	return bookinf;
+}
+const char* Book_information::get_bookname() { return bookname; }
+const char* Book_information::get_writername() { return writer.get_writer_name(); }
+Book_information::~Book_information() {
+
+}
+
+//Books_List.cpp
+
+#include "Books_List.h"
+void Books_List::addbook(Book_information _book) {
+	int num = search((char*)_book.get_bookname());
+	if (num == 0) {
+		counter++;
+		booklist[counter - 1] = _book;
+	}
+	else
+		booklist[num - 1].add_numberofbook();
+}
+void Books_List::print_books() {
+	char bookinf[100][100];
+	for (int i = 0; i < counter; i++) {
+		strcpy(bookinf[i], (booklist[i]).print_book_information());
+	}
+	sortfunction(bookinf, counter);
+	for (int i = 0; i < counter; i++) {
+		cout << bookinf[i] << endl;
+	}
+}
+int Books_List::search(char _bookname[]) {
+	bool flag = false;
+	int i = 0;
+	for (i = 0; i < counter; i++) {
+		if (strcmp(_bookname, booklist[i].get_bookname()) == 0) {
+			flag = true;
+			break;
+		}
+	}
+	if (flag)
+		return i + 1;
+	else
+		return 0;
+}
+void Books_List::checkandgive_to_borrow_book(int booknum) {
+	if (booklist[booknum].get_numberofbook() == 0)
+		cout << "Sorry! this book was borrowed before" << endl;
+	else {
+		cout << "this book is borrowed to you.please return it in a month" << endl;
+		booklist[booknum].subtract_numberofbook();
+	}
+}
+void Books_List::return_book(int booknum) {
+	booklist[booknum].add_numberofbook();
+	cout << "thank you for bring it back" << endl;
+}
+void Books_List::findandprint_writerbooks(char writername[]) {
+	char bookname[100][100];
+	bool flag = false;
+	int j = 0;
+	for (int i = 0; i < counter; i++) {
+		if (strcmp(booklist[i].get_writername(), writername) == 0) {
+			strcpy(bookname[j], booklist[i].get_bookname());
+			j++;
+			flag = true;
+		}
+	}
+	if (flag) {
+		sortfunction(bookname, j);
+		for (int i = 0; i < j; i++) {
+			cout << bookname[i] << endl;
+		}
+	}
+	else
+		cout << "no books in this library writed by this writer!" << endl;
+}
+Books_List::~Books_List() {
+	for (int i = 0; i < counter; i++)
+		(booklist[i]).~Book_information();
+}
+void Books_List::sortfunction(char str[][100], int count) {
+	char temp[100];
+	for (int i = 0; i <= count; i++)
+		for (int j = i + 1; j <= count; j++) {
+			if (strcmp(str[i], str[j]) > 0) {
+				strcpy(temp, str[i]);
+				strcpy(str[i], str[j]);
+				strcpy(str[j], temp);
+			}
+		}
+}
+
+//Librarys_Information.cpp
+
+#include "Librarys_Information.h"
+void Librarys_Information::set(char _libraryname[], char _addressint[], int _establishedyear, int _numofemployers, float _starttime, float _endtime, Books_List _booklists) {
+	strcpy(libraryname, _libraryname);
+	strcpy(address, _addressint);
+	establishedyear = _establishedyear;
+	numofemployers = _numofemployers;
+	starttime = _starttime;
+	endtime = _endtime;
+	booklists = _booklists;
+}
+void Librarys_Information::add_book_to_list(Book_information _book) {
+	booklists.addbook(_book);
+}
+int Librarys_Information::search_book_from_list(char _book[]) {
+	return booklists.search(_book);
+}
+void Librarys_Information::checkandgive_to_borrow(char _book[]) {
+	booklists.checkandgive_to_borrow_book(booklists.search(_book) - 1);
+}
+void Librarys_Information::checkandget_book(char _book[]) {
+	booklists.return_book(booklists.search(_book) - 1);
+}
+void Librarys_Information::print_books_information() {
+	booklists.print_books();
+}
+void Librarys_Information::print_library_name() {
+	cout << libraryname << endl;
+}
+void Librarys_Information::find_writer(char writername[]) {
+	booklists.findandprint_writerbooks(writername);
+}
+float Librarys_Information::get_starttime() { return starttime; }
+float Librarys_Information::get_endtime() { return endtime; }
+Librarys_Information::Librarys_Information() {
+	libraryname[0] = '\0';
+	address[100] = '\0';
+	establishedyear = 0;
+	numofemployers = 0;
+	starttime = 0;
+	endtime = 0;
+}
+Librarys_Information::~Librarys_Information() {
+
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+//Source.cpp
+
+#pragma warning(disable: 4996)
+#include "Librarys_Information.h"
+using namespace std;
+void add_library();
+void menu();
+void print_library_list();
+Books_List add_books_list();
+Book_information add_books();
+void input(Librarys_Information library);
+void print_booksinf(Librarys_Information library);
+void library_menu(Librarys_Information library);
+int main() {
+	FILE* file_obj;
+	file_obj = fopen("Input2.txt", "w");
+	fclose(file_obj);
+	menu();
+
+}
+void menu() {
+	system("cls");
+	int num = 0;
+	cout << "		1.add library" << endl;
+	cout << "		2.open a library" << endl;
+	cout << "		0.exit" << endl;
+	cin >> num;
+	switch (num)
+	{
+	case 0:exit(0);
+	case 1:add_library();
+	case 2:print_library_list();
+	default: {cout << "ERROR" << endl; menu(); }
+	}
+}
+void print_library_list() {
+	system("cls");
+	int counter = 0;
+	Librarys_Information library;
+	ifstream file_obj;
+	file_obj.open("Input2.txt", ios::in | ios::binary);
+	file_obj.read((char*)&library, sizeof(library));
+	cout << "which library do you want to open?" << endl;;
+	for (counter = 1; (!file_obj.eof()); counter++) {
+		cout << counter << ". ";
+		library.print_library_name();
+		file_obj.read((char*)&library, sizeof(library));
+	}
+	file_obj.close();
+	file_obj.open("Input2.txt", ios::in | ios::binary);
+	file_obj.read((char*)&library, sizeof(library));
+	int num = 0;
+	cin >> num;
+	for (int i = 1; i <= counter; i++) {
+		if (i == num) {
+			file_obj.close();
+			library_menu(library);
+		}
+		file_obj.read((char*)&library, sizeof(library));
+	}
+}
+void library_menu(Librarys_Information library) {
+	system("cls");
+	int num = 0;
+	cout << "1.add book to the library\n2.Checking book inventory\n3.Borrow a book\n4.Return a book\n5.print list of all books in this library"
+		"	\n6.print list of  a writer's books\n7.library situation ( open or close)\n8.back to menu\n0.exit" << endl;
+	cin >> num;
+	switch (num)
+	{
+	case 1: {
+		system("cls");
+		library.add_book_to_list(add_books());
+		Sleep(2000);
+		library_menu(library);
+	}
+	case 2: {
+		system("cls");
+		char bookname[100];
+		cout << "what is the book name?" << endl;
+		cin >> bookname;
+		if ((library.search_book_from_list(bookname)) == 0)
+			cout << "this book does not exist" << endl;
+		else
+			cout << "this book exist" << endl;
+		Sleep(2000);
+		library_menu(library);
+	}
+	case 3: {
+		system("cls");
+		char bookname[100];
+		cout << "what is the book name?" << endl;
+		cin >> bookname;
+		if ((library.search_book_from_list(bookname)) == 0)
+			cout << "this book does not exist" << endl;
+		else {
+			library.checkandgive_to_borrow(bookname);
+		}
+		Sleep(2000);
+		library_menu(library);
+	}
+	case 4: {
+		system("cls");
+		char bookname[100];
+		cout << "what is the book name?" << endl;
+		cin >> bookname;
+		if ((library.search_book_from_list(bookname)) == 0)
+			cout << "this book does not belong this library" << endl;
+		else {
+			library.checkandget_book(bookname);
+		}
+		Sleep(2000);
+		library_menu(library);
+	}
+	case 5: {print_booksinf(library); }
+	case 6: {
+		system("cls");
+		char writername[100];
+		cout << "what is the writer's name?" << endl;
+		cin >> writername;
+		library.find_writer(writername);
+		int num = 0;
+		cout << "1.back to menu\n0.exit" << endl;
+		cin >> num;
+		switch (num)
+		{
+		case 1:library_menu(library);
+		case 2:exit(0);
+		default:exit(0);
+		}
+	}
+	case 7: {
+		system("cls");
+		float time = 0, start = 0, end = 0;;
+		cout << "what time do you want to go to library?" << endl;
+		cin >> time;
+		start = library.get_starttime();
+		end = library.get_endtime();
+		if (time <= end && start <= time)
+			cout << "the library is open in this time" << endl;
+		else
+			cout << "the library is close in this time" << endl;
+		Sleep(2000);
+		library_menu(library);
+	}
+	case 8:menu();
+	case 0: {system("cls"); exit(0); }
+	default: {system("cls"); exit(0); }
+	}
+}
+void add_library() {
+	system("cls");
+	Librarys_Information library;
+	char libraryname[100];
+	char address[100];
+	int establishedyear = 0;
+	int numofemployers = 0;
+	float starttime = 0;
+	float endtime = 0;
+	cout << "what is the library's name?" << endl;
+	cin >> libraryname;
+	cout << "what is library address?" << endl;
+	cin >> address;
+	cout << "when is the library's established year?" << endl;
+	cin >> establishedyear;
+	cout << "how many employers work in this library?" << endl;
+	cin >> numofemployers;
+	cout << "what time the library open?" << endl;
+	cin >> starttime;
+	cout << "what time the library close?" << endl;
+	cin >> endtime;
+	cout << "add books to this library!" << endl;
+	library.set(libraryname, address, establishedyear, numofemployers, starttime, endtime, add_books_list());
+
+	input(library);
+}
+void input(Librarys_Information library) {
+	ofstream file_obj;
+	file_obj.open("Input2.txt", ofstream::out | ios::app | ios::binary);
+	file_obj.write((char*)&library, sizeof(library));
+	file_obj.close();
+	Sleep(3000);
+	menu();
+}
+void print_booksinf(Librarys_Information library) {
+	system("cls");
+	library.print_books_information();
+	int num = 0;
+	cout << "1.back to menu\n0.exit" << endl;
+	cin >> num;
+	switch (num)
+	{
+	case 1:library_menu(library);
+	case 2:exit(0);
+	default:exit(0);
+	}
+}
+Books_List add_books_list() {
+	int temp = 1;
+	Books_List bookslist;
+	Book_information book;
+	while (temp == 1) {
+		book = add_books();
+		bookslist.addbook(book);
+		cout << "Do you want to add more books? ( write 1 for say YES and 0 for NO)" << endl;
+		cin >> temp;
+	}
+	return bookslist;
+}
+Book_information add_books() {
+	Book_information book;
+	char bookname[100];
+	writer_information writer;
+	char writername[100];
+	char e_mail[100];
+	string gender1;
+	char gender;
+	int printyear = 0;
+	cout << "what is the name of book?" << endl;
+	cin >> bookname;
+	cout << "what is the writer's name?" << endl;
+	cin >> writername;
+	cout << "what is the writer's e_mail?" << endl;
+	cin >> e_mail;
+	cout << "what is the writer's gender?(male or female)" << endl;
+	cin >> gender1;
+	if (gender1 == "male")
+		gender = 'm';
+	else
+		gender = 'f';
+	writer.set_writer_information(writername, e_mail, gender);
+	cout << "when was this book published?" << endl;
+	cin >> printyear;
+	book.set_information(bookname, writer, printyear);
+	return book;
+}
