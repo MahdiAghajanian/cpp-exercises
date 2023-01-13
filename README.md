@@ -1,2 +1,2 @@
 # cpp-exercises
-Solved exercises for learning cpp
+Solved exercises to learn cpp
